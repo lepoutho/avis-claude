@@ -1,0 +1,8 @@
+# Force le téléchargement des PDF au lieu de leur ouverture dans le lecteur
+# intégré du navigateur (Brave, Chrome…), qui ignorent souvent l'attribut
+# "download" du lien.
+<IfModule mod_headers.c>
+  <FilesMatch "\.pdf$">
+    Header set Content-Disposition "attachment; filename=\"tablature_vierge.pdf\""
+  </FilesMatch>
+</IfModule>
