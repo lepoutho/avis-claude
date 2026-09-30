@@ -1,9 +1,7 @@
 ---
 deployment:
   tasks:
-    - export DEPLOYPATH=/home/tape2497/tablature-vierge.teodul.fr/
+    - export DEPLOYPATH=/home/tape2497/avis-claude.teodul.fr/
     - /bin/mkdir -p $DEPLOYPATH
-    - /bin/cp -R css $DEPLOYPATH
-    - /bin/cp -R doc $DEPLOYPATH
     - /bin/cp -R html/* $DEPLOYPATH
     - /bin/cp html/.htaccess $DEPLOYPATH

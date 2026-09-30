@@ -2,17 +2,401 @@
 <html lang="fr">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Tablature vierge</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Trois semaines avec Claude</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700&family=Space+Grotesk:wght@400;600&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="../css/style.css">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,500;0,600;1,500&family=IBM+Plex+Mono:wght@400;500;600&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper: #F6F5F1;
+    --card-bg: #FFFFFF;
+    --ink: #1C2321;
+    --ink-soft: rgba(28,35,33,0.64);
+    --ink-faint: rgba(28,35,33,0.40);
+    --line: rgba(28,35,33,0.13);
+    --accent: #1F8A7A;
+    --accent-ink: #0F4640;
+    --warn: #B5482F;
+    --warn-bg: rgba(181,72,47,0.08);
+    --good-bg: rgba(31,138,122,0.08);
+    color-scheme: light;
+  }
+  @media (prefers-color-scheme: dark){
+    :root:not([data-theme="light"]){
+      --paper: #14181A;
+      --card-bg: #1D2224;
+      --ink: #ECEAE4;
+      --ink-soft: rgba(236,234,228,0.68);
+      --ink-faint: rgba(236,234,228,0.42);
+      --line: rgba(236,234,228,0.14);
+      --accent: #58CBB6;
+      --accent-ink: #BFF1E6;
+      --warn: #E4906D;
+      --warn-bg: rgba(228,144,109,0.12);
+      --good-bg: rgba(88,203,182,0.10);
+      color-scheme: dark;
+    }
+  }
+  :root[data-theme="dark"]{
+    --paper: #14181A;
+    --card-bg: #1D2224;
+    --ink: #ECEAE4;
+    --ink-soft: rgba(236,234,228,0.68);
+    --ink-faint: rgba(236,234,228,0.42);
+    --line: rgba(236,234,228,0.14);
+    --accent: #58CBB6;
+    --accent-ink: #BFF1E6;
+    --warn: #E4906D;
+    --warn-bg: rgba(228,144,109,0.12);
+    --good-bg: rgba(88,203,182,0.10);
+    color-scheme: dark;
+  }
+
+  *{ box-sizing: border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Source Sans 3', -apple-system, BlinkMacSystemFont, sans-serif;
+    font-size: 16.5px;
+    line-height: 1.6;
+    padding-inline: 20px;
+    padding-block: 56px 80px;
+  }
+  .page{ max-width: 680px; margin: 0 auto; }
+
+  .kicker{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--accent-ink);
+    display: flex; align-items: center; gap: 8px;
+  }
+  .kicker::before{ content:'//'; color: var(--ink-faint); }
+
+  header.hero{ margin-bottom: 44px; }
+  h1{
+    font-family: 'Lora', serif;
+    font-weight: 600;
+    font-size: clamp(28px, 6vw, 40px);
+    line-height: 1.18;
+    margin: 10px 0 14px;
+    text-wrap: balance;
+  }
+  .hero-sub{
+    color: var(--ink-soft);
+    font-size: 16px;
+    max-width: 54ch;
+  }
+  .meta-row{
+    display: flex; flex-wrap: wrap; gap: 8px;
+    margin-top: 20px;
+  }
+  .chip{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12px;
+    color: var(--ink-soft);
+    border: 1px solid var(--line);
+    border-radius: 100px;
+    padding: 5px 11px;
+    display: inline-flex; align-items: center; gap: 6px;
+    white-space: nowrap;
+  }
+  .chip b{ color: var(--ink); font-weight: 600; }
+  a.chip{ text-decoration: none; }
+  a.chip:hover{ border-color: var(--accent); color: var(--accent-ink); }
+
+  section{ margin-bottom: 48px; }
+  h2{
+    font-family: 'Lora', serif;
+    font-weight: 600;
+    font-size: 22px;
+    margin: 0 0 18px;
+  }
+
+  .measure{ max-width: 62ch; }
+  .measure p{ margin: 0 0 14px; color: var(--ink); }
+  .measure p:last-child{ margin-bottom: 0; }
+
+  /* Timeline of narrative beats */
+  .timeline{
+    border-left: 2px solid var(--line);
+    padding-left: 22px;
+    display: flex; flex-direction: column; gap: 34px;
+  }
+  .beat{ position: relative; }
+  .beat::before{
+    content:'';
+    position: absolute; left: -27.5px; top: 4px;
+    width: 9px; height: 9px; border-radius: 50%;
+    background: var(--accent);
+    box-shadow: 0 0 0 3px var(--paper);
+  }
+  .beat .kicker{ margin-bottom: 8px; }
+
+  /* En chiffres — terminal-styled block, intentionally fixed dark look */
+  .stat-block{
+    background: #101614;
+    border-radius: 12px;
+    padding: 22px 22px 20px;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13.5px;
+    line-height: 1.65;
+    overflow-x: auto;
+  }
+  .stat-block ul{ list-style: none; margin: 0; padding: 0; }
+  .stat-block li{
+    color: #D8F0E6;
+    padding: 7px 0;
+    border-top: 1px solid rgba(255,255,255,0.07);
+    display: flex; gap: 10px;
+  }
+  .stat-block li:first-of-type{ border-top: none; }
+  .stat-block li::before{ content:'▸'; color: #6FE0C4; flex: none; }
+  .stat-block .num{ color: #8FE9D2; font-variant-numeric: tabular-nums; font-weight: 600; }
+  .stat-block .dim{ color: rgba(216,240,230,0.55); }
+
+  .lines-row{ display: flex; gap: 18px; margin-top: 14px; flex-wrap: wrap; }
+  .lines-row div{ color: rgba(216,240,230,0.85); }
+  .lines-row .n{ color: #8FE9D2; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+  /* Comparison */
+  .compare{
+    display: grid; grid-template-columns: 1fr 1fr; gap: 14px;
+  }
+  @media (max-width: 480px){ .compare{ grid-template-columns: 1fr; } }
+  .compare .card{
+    background: var(--card-bg);
+    border: 1px solid var(--line);
+    border-radius: 12px;
+    padding: 18px 18px 20px;
+  }
+  .compare .card.with{ border-color: var(--accent); }
+  .compare .label{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 11.5px; letter-spacing: 0.06em; text-transform: uppercase;
+    color: var(--ink-faint);
+  }
+  .compare .with .label{ color: var(--accent-ink); }
+  .compare .hours{
+    font-family: 'Lora', serif; font-weight: 600;
+    font-size: 26px; margin: 6px 0 10px;
+  }
+  .qlabel{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 12.5px; font-weight: 500; letter-spacing: 0.04em;
+    color: var(--ink-soft);
+    margin-bottom: 8px;
+  }
+  .qbar-wrap{ display:flex; align-items:center; gap: 8px; }
+  .qbar{ flex:1; height: 6px; border-radius: 4px; background: var(--line); overflow: hidden; }
+  .qbar > i{ display:block; height:100%; background: var(--ink-faint); border-radius: 4px; }
+  .with .qbar > i{ background: var(--accent); }
+  .qscore{ font-family:'IBM Plex Mono', monospace; font-size: 12.5px; color: var(--ink-soft); font-variant-numeric: tabular-nums; }
+
+  blockquote.verdict{
+    font-family: 'Lora', serif;
+    font-style: italic;
+    font-size: 20px;
+    line-height: 1.5;
+    color: var(--ink);
+    margin: 28px 0 0;
+    padding-left: 20px;
+    border-left: 3px solid var(--accent);
+  }
+
+  /* diff-style pros/cons pulled into the Claude quote */
+  .diff{ display:flex; flex-direction:column; gap: 10px; margin: 16px 0; }
+  .diff .row{ border-radius: 8px; padding: 12px 14px; font-size: 15px; }
+  .diff .row.plus{ background: var(--good-bg); border-left: 3px solid var(--accent); }
+  .diff .row.minus{ background: var(--warn-bg); border-left: 3px solid var(--warn); }
+  .diff .row b{ font-family:'IBM Plex Mono', monospace; font-size: 12px; letter-spacing:0.03em; text-transform: uppercase; display:block; margin-bottom: 4px; }
+  .diff .row.plus b{ color: var(--accent-ink); }
+  .diff .row.minus b{ color: var(--warn); }
+
+  .claude-card{
+    background: var(--card-bg);
+    border: 1px solid var(--line);
+    border-radius: 14px;
+    padding: 24px 24px 22px;
+  }
+  .claude-card .who{
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    color: var(--accent-ink);
+    display:flex; align-items:center; gap:8px;
+    margin-bottom: 16px;
+  }
+  .claude-card .who::before{ content:'claude ~'; color: var(--ink-faint); }
+  .claude-card p{ margin: 0 0 14px; color: var(--ink); }
+  .claude-card p:last-child{ margin-bottom: 0; }
+  .claude-card strong{ font-weight: 600; }
+
+  footer{
+    margin-top: 56px;
+    padding-top: 24px;
+    border-top: 1px solid var(--line);
+    display: flex; flex-wrap: wrap; gap: 10px 18px;
+    align-items: center;
+    font-family: 'IBM Plex Mono', monospace;
+    font-size: 13px;
+    color: var(--ink-soft);
+  }
+  footer a{ color: var(--accent-ink); text-decoration: none; border-bottom: 1px solid transparent; }
+  footer a:hover{ border-bottom-color: currentColor; }
+</style>
 </head>
 <body>
-<main class="card">
-  <p class="mark">♪ Tablature</p>
-  <h1>Tablature vierge</h1>
-  <a class="download-btn" href="../doc/tablature_vierge.pdf" download>⬇ Télécharger le PDF</a>
-</main>
+<div class="page">
+
+  <header class="hero">
+    <div class="kicker">retour d'expérience</div>
+    <h1>Trois semaines avec Claude, racontées par celui qui a tenu le clavier de l'autre côté</h1>
+    <p class="hero-sub">Un ancien développeur back-office (C++/PHP) teste l'IA pour construire une vraie application de A à Z — et se fait sa propre opinion, sans filtre.</p>
+    <div class="meta-row">
+      <span class="chip">app <b>vacances</b> — partage de dépenses</span>
+      <span class="chip"><b>94</b> commits</span>
+      <span class="chip"><b>3</b> semaines</span>
+      <a class="chip" href="https://vacances.teodul.fr" target="_blank" rel="noopener">essayer l'app ↗</a>
+    </div>
+  </header>
+
+  <section>
+    <div class="timeline">
+
+      <div class="beat">
+        <div class="kicker">le déclic</div>
+        <div class="measure">
+          <p>À force de voir des vidéos YouTube sur l'IA, j'ai décidé de tester le bidule pour en savoir plus et de mettre les mains dans le cambouis.</p>
+          <p>Je commence déjà par la version gratuite, où je suis limité assez rapidement : par exemple il est 19h et je dois attendre 23h pour l'utiliser à nouveau, plus de ressources disponibles, renouvellement à 23h, où on repart à zéro.</p>
+          <p>Donc, abonnement payant à 216 euros pour l'année, mais bon on y va, on n'a qu'une vie. Là c'est bon, je n'ai jamais dépensé plus de 40% du stock des ressources disponibles.</p>
+        </div>
+      </div>
+
+      <div class="beat">
+        <div class="kicker">le recadrage</div>
+        <div class="measure">
+          <p>Je lui pose quelques questions diverses techniques liées au code, et là c'est le cirage de pompe de sa part. Du coup je le recadre, je lui demande de ne pas être complaisant, que la seule chose que ça fait, c'est de m'énerver. Il enregistre, et ensuite tout va bien.</p>
+          <p>Par la suite j'ai eu besoin de faire un recadrage, depuis c'est nickel, c'est juste un outil.</p>
+        </div>
+      </div>
+
+      <div class="beat">
+        <div class="kicker">la commande</div>
+        <div class="measure">
+          <p>Je lui demande de me coder une application web de partage des dépenses pour les personnes en vacances. Au bout d'un instant très court, j'ai le fichier HTML à ouvrir dans mon navigateur.</p>
+          <p>Et là oups, surprise, l'IHM (interface homme/machine) est vraiment pas mal, le code JavaScript est super bien écrit, je le lis attentivement et j'apprends plein de trucs, que du code natif JavaScript pur (je suis un ancien programmeur pro plutôt back-office C++ PHP).</p>
+        </div>
+      </div>
+
+      <div class="beat">
+        <div class="kicker">le détour javascript</div>
+        <div class="measure">
+          <p>Au point que j'ouvre une autre conversation apprentissage JavaScript où je lui demande d'être mon professeur. Il me demande mon niveau, que je lui donne : je ne suis pas un débutant mais pas un expert non plus.</p>
+          <p>Et c'est parti pour une formation JavaScript, comme professeur il est très bien. Il peut expliquer un concept pas facile en restant très clair, si on ne comprend pas il peut l'aborder sous un autre angle qui peut faciliter la compréhension. Toujours disponible...</p>
+          <p>Donc c'est assez rigolo, il me donne des exercices pour que je comprenne bien des concepts, pour le moment on creuse les closures avec différentes syntaxes et les nuances qui y sont liées, les promesses JavaScript... et ça me fait progresser, c'est des concepts que j'avais pratiqués mais avec une connaissance superficielle. Je vais peut-être finir par aimer le JavaScript (non, c'est une blague).</p>
+        </div>
+      </div>
+
+      <div class="beat">
+        <div class="kicker">la relecture</div>
+        <div class="measure">
+          <p>Pour revenir à l'appli, j'épluche le code en profondeur, l'algo de répartition que je trouve bien, robuste et fonctionnel. Les CSS je les lis vite fait, désolé mais impossible de m'y intéresser de près ou de loin, et le code JavaScript évoqué plus haut.</p>
+          <p>La seule contrainte technique que je vois à lui donner est d'isoler le code JavaScript dans différents fichiers (il m'avait tout mis à l'arrache dans le HTML). Ce qu'il fait immédiatement.</p>
+        </div>
+      </div>
+
+      <div class="beat">
+        <div class="kicker">trois semaines</div>
+        <div class="measure">
+          <p>C'est le début de 3 semaines de collaboration pour arriver à l'application finale.</p>
+        </div>
+      </div>
+
+    </div>
+  </section>
+
+  <section>
+    <h2>En chiffres</h2>
+    <div class="stat-block">
+      <ul>
+        <li><span>Demande d'évolutions, si je compte tout : réflexion antérieure, le fameux « ce serait bien que… », mûrissement (beaucoup de temps à réfléchir + benchmark). La version finale n'a rien à voir avec la première version, beaucoup de travail sur les détails de l'IHM et ajout de pas mal de fonctionnalités pour aboutir à une qualité professionnelle <span class="dim">→</span> <span class="num">~20h</span></span></li>
+        <li><span><span class="num">94</span> commits sur <span class="num">3</span> semaines, avec test à chaque fois (un commit = Claude change le code, je le teste ensuite) <span class="dim">→</span> <span class="num">~20h</span></span></li>
+        <li><span>Correction de bugs : <span class="num">2</span> bugs détectés par moi-même et corrigés par Claude <span class="dim">→</span> <span class="num">1h</span></span></li>
+        <li><span>Relecture de code, pas obligatoire, juste du loisir <span class="dim">→</span> <span class="num">~5h</span></span></li>
+      </ul>
+      <div class="lines-row">
+        <div>JavaScript <span class="n">2000</span> lignes</div>
+        <div>CSS <span class="n">550</span> lignes</div>
+        <div>HTML <span class="n">166</span> lignes</div>
+        <div class="dim">soit <span class="n">2716</span> lignes</div>
+      </div>
+    </div>
+  </section>
+
+  <section>
+    <h2>Estimation</h2>
+    <div class="compare">
+      <div class="card with">
+        <div class="label">Avec Claude</div>
+        <div class="hours">45h</div>
+        <div class="qlabel">Qualité produite estimée</div>
+        <div class="qbar-wrap">
+          <div class="qbar"><i style="width:90%"></i></div>
+          <span class="qscore">9/10</span>
+        </div>
+      </div>
+      <div class="card">
+        <div class="label">Sans Claude</div>
+        <div class="hours">3–4 mois</div>
+        <div class="qlabel">Qualité produite estimée</div>
+        <div class="qbar-wrap">
+          <div class="qbar"><i style="width:70%"></i></div>
+          <span class="qscore">7/10</span>
+        </div>
+      </div>
+    </div>
+    <blockquote class="verdict">Bilan sans appel, il n'y a pas photo...</blockquote>
+  </section>
+
+  <section>
+    <h2>Ce que j'en pense</h2>
+    <div class="measure">
+      <p>Durant ces trois semaines je n'ai pas produit de code, je comprends très bien la frustration que ça engendre, je suis moi-même un ancien développeur.</p>
+      <p>Mais finalement en avançant dans le projet mon expérience de développeur m'a servi, notamment l'habitude de tout découper en petites tâches (méthode agile que j'ai longtemps pratiquée). En effet, Claude développe vite et bien si la demande est précise et ciblée, je m'en suis vite rendu compte, il faut faire du pas à pas facilement testable pour être efficace, ce qui explique les 94 commits en trois semaines.</p>
+      <p>De plus, j'ai trop aimé la réflexion/création d'une application sans avoir le poids du code à produire. Peut-être que ce qui me plaisait dans le métier de développeur était de créer des applications plus que de les coder, je n'y avais jamais vraiment pensé sous cet angle avant cette expérience.</p>
+      <p>Quoique je garde de l'appétence pour le code : un bel algorithme, élégant et simple, qui répond à une question complexe, c'est de l'art ; la résolution d'un bug vicieux qui nous a demandé toute notre patience et notre résilience, où on ne lâche pas la bête tant qu'on n'a pas trouvé, la satisfaction de le livrer en prod, c'est quelque chose.</p>
+      <p>En fait, je suis partagé, je n'ai pas d'avis tranché.</p>
+    </div>
+  </section>
+
+  <section>
+    <h2>L'avis de Claude, sans retouche</h2>
+    <p class="hero-sub" style="margin-bottom:18px;">J'ai demandé son avis à Claude sur le déroulement du projet, je n'ai rien changé, je vous le livre tel quel, c'est lui qui parle :</p>
+    <div class="claude-card">
+      <div class="who">honnête plutôt que complaisant</div>
+      <div class="diff">
+        <div class="row plus">
+          <b>+ ce qui a bien fonctionné</b>
+          Sur du code contenu et bien structuré comme vacances-app, je suis efficace pour itérer vite : ajouter une fonctionnalité, la tester en conditions réelles (navigateur intégré, données localStorage), et corriger au fur et à mesure. Le bug du querySelector non scopé (perte silencieuse des pourcentages de participation) est un bon exemple : je l'ai retrouvé précisément parce que tu m'as donné ton vrai fichier de données bugué plutôt qu'une description vague — plus le repro est concret, plus je suis fiable.
+        </div>
+        <div class="row minus">
+          <b>− ce qui a moins bien marché</b>
+          Le bug du toast/pastille « Modifier la dépense » que je n'ai jamais réussi à reproduire malgré plusieurs tentatives — j'ai dû laisser tomber, faute d'accès direct à ton vrai téléphone. Je suis aveugle à tout ce qui n'est pas reproductible devant moi : ton ressenti utilisateur, l'ergonomie réelle au doigt, les caches spécifiques à ton opérateur mobile. J'ai aussi besoin d'être recadré sur le design produit — les deux reverts (résumé personnel dans le presse-papier, symboles de devise) montraient une bonne idée technique mais une mauvaise lecture du contexte social/humain, que toi seul pouvais voir.
+        </div>
+      </div>
+      <p><strong>En résumé —</strong> Je suis un bon exécutant technique rapide, mais le jugement produit, la vérification terrain, et la mémoire du « pourquoi » du projet restent fondamentalement les tiens. C'est une collaboration, pas une délégation.</p>
+    </div>
+  </section>
+
+  <footer>
+    <span>Vacances — partage de dépenses entre voyageurs</span>
+    <a href="https://vacances.teodul.fr" target="_blank" rel="noopener">vacances.teodul.fr ↗</a>
+    <a href="https://youtu.be/NhG8x2W55U0" target="_blank" rel="noopener">voir la présentation ↗</a>
+  </footer>
+
+</div>
 </body>
 </html>
